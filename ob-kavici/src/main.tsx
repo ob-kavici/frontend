@@ -7,9 +7,7 @@ import { ThemeProvider } from './components/utils/theme-provider.tsx'
 import Navbar from './components/utils/navbar.tsx'
 import HomePage from '@/components/home/home-page.tsx'
 import GamePage from './components/games/game-page.tsx'
-import ConnectionsGame from './components/games/connections/connections-game.tsx'
 import Games from './components/games/games.tsx'
-import LetterBoxedGame from './components/games/letter-boxed/letter-boxed-game.tsx'
 
 const router = createBrowserRouter([
   {
@@ -22,22 +20,12 @@ const router = createBrowserRouter([
     element: <Games />,
   },
   {
-    path: "/games",
+    path: "/games/:gameId",
     element: <GamePage />,
-    children: [
-      {
-        path: "connections",
-        element: <ConnectionsGame />,
-      },
-      {
-        path: "letter-boxed",
-        element: <LetterBoxedGame />,
-      },
-      {
-        path: "*",
-        element: <NotFound />,
-      }
-    ],
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ])
 
