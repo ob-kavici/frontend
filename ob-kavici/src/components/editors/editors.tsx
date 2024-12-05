@@ -40,9 +40,8 @@ const Editors: React.FC = () => {
                         </CarouselItem>
                     ))}
                 </CarouselContent>
-                {/* Position navigation arrows */}
-                <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2 sm:left-4" />
-                <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 sm:right-4" />
+                <CarouselPrevious className="absolute left-8 top-1/2 transform -translate-y-1/2" />
+                <CarouselNext className="absolute right-8 top-1/2 transform -translate-y-1/2" />
             </Carousel>
         </div>
 
