@@ -24,7 +24,6 @@ const GamePage = () => {
                 <h1 className="text-4xl capitalize mt-2">{gameId.replace('-', ' ')}</h1>
             </div>
             <Card className="mb-4">
-                <CardHeader />
                 <CardContent>
                     <React.Suspense fallback={<Skeleton className="h-64 w-full" />}>
                         <GameComponent />

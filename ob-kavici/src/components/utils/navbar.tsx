@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Avatar,
     AvatarFallback,
@@ -6,14 +6,52 @@ import {
 } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ModeToggle } from './mode-toggle';
+import { Link, useNavigate } from 'react-router-dom';
+import { logout } from '@/utils/auth';
+import { supabase } from '@/utils/supabase';
+import { Button } from '../ui/button';
 
 const Navbar: React.FC = () => {
+    const [user, setUser] = useState<any>(null);
+    const navigate = useNavigate();
+
+    // Fetch user on component mount
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data, error } = await supabase.auth.getUser();
+            if (error) {
+                console.error('Error fetching user:', error.message);
+            } else {
+                setUser(data?.user);
+            }
+        };
+
+        fetchUser();
+
+        // Listen for auth changes
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user || null);
+        });
+
+        // Cleanup subscription on unmount
+        return () => {
+            authListener.subscription.unsubscribe();
+        };
+    }, []);
+
+    const handleLogout = async () => {
+        await logout();
+        setUser(null);
+        navigate('/auth');
+    };
+
     return (
         <div className="flex items-center justify-between p-5 bg-background text-foreground">
             <div className="text-4xl font-cursive">ob-kavici</div>
             <div className="flex items-center space-x-4">
                 <ModeToggle />
-                <DropdownMenu>
+                {user ? (
+                    <DropdownMenu>
                     <DropdownMenuTrigger>
                         <Avatar>
                             <AvatarImage src="https://via.placeholder.com/150" alt="User Avatar" />
@@ -21,16 +59,21 @@ const Navbar: React.FC = () => {
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuLabel>{ user.email }</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Billing</DropdownMenuItem>
-                        <DropdownMenuItem>Team</DropdownMenuItem>
-                        <DropdownMenuItem>Subscription</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Sign Out</DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Link to="/profile">Profile</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout} className="text-destructive">Log Out</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+                ) : (
+                    <Link to="/auth">
+                        <Button variant="outline">Log In</Button>
+                    </Link>
+                )
+                }
+                
             </div>
         </div>
     );
