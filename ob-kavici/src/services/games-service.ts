@@ -42,12 +42,22 @@ class GamesService {
         }
     }
 
-    public async getGameById(gameType: string, gameId: string) {
+    public async getGameDataById(gameType: string, gameId: string) {
         try {
             const response = await this.axiosInstance.get(`/${gameType}/${gameId}`);
             return response.data;
         } catch (error) {
             console.error(`Error fetching game with ID ${gameId}:`, error);
+            throw error;
+        }
+    }
+
+    public async getDailyGame(gameType: string) {
+        try {
+            const response = await this.axiosInstance.get(`/${gameType}/daily`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching daily game of type ${gameType}:`, error);
             throw error;
         }
     }

@@ -7,53 +7,56 @@ import { motion, AnimatePresence } from 'framer-motion'
 import shuffle from 'lodash/shuffle'
 import { Shuffle } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { Progress } from '@/components/ui/progress'
+import gamesService from '@/services/games-service'
+
+const difficultyColors: Record<number, string> = {
+    0: 'bg-yellow-500 dark:bg-yellow-600',
+    1: 'bg-green-500 dark:bg-green-600',
+    2: 'bg-blue-400 dark:bg-blue-500',
+    3: 'bg-purple-400 dark:bg-purple-500',
+}
 
 type Card = {
     id: number
     content: string
     category: string
-    color: string
+    difficulty: number
 }
 
-const initialCards: Card[] = [
-    { id: 1, content: 'BELT', category: 'PUNCH', color: 'bg-yellow-500 dark:bg-yellow-600' },
-    { id: 2, content: 'BLOW', category: 'PUNCH', color: 'bg-yellow-500 dark:bg-yellow-600' },
-    { id: 3, content: 'SOCK', category: 'PUNCH', color: 'bg-yellow-500 dark:bg-yellow-600' },
-    { id: 4, content: 'SLUG', category: 'PUNCH', color: 'bg-yellow-500 dark:bg-yellow-600' },
+interface ConnectionsGameProps {
+    gameId: string
+}
 
-    { id: 5, content: 'SANDWICH', category: 'CRAM', color: 'bg-green-500 dark:bg-green-600' },
-    { id: 6, content: 'SHOEHORN', category: 'CRAM', color: 'bg-green-500 dark:bg-green-600' },
-    { id: 7, content: 'SQUEEZE', category: 'CRAM', color: 'bg-green-500 dark:bg-green-600' },
-    { id: 8, content: 'WEDGE', category: 'CRAM', color: 'bg-green-500 dark:bg-green-600' },
-
-    { id: 9, content: 'CATERPILLAR', category: 'COMPANIES NAMED AFTER ANIMALS', color: 'bg-blue-400 dark:bg-blue-500' },
-    { id: 10, content: 'DOVE', category: 'COMPANIES NAMED AFTER ANIMALS', color: 'bg-blue-400 dark:bg-blue-500' },
-    { id: 11, content: 'GREYHOUND', category: 'COMPANIES NAMED AFTER ANIMALS', color: 'bg-blue-400 dark:bg-blue-500' },
-    { id: 12, content: 'PUMA', category: 'COMPANIES NAMED AFTER ANIMALS', color: 'bg-blue-400 dark:bg-blue-500' },
-
-    { id: 13, content: 'INDY', category: 'HOMOPHONES OF MUSIC GENRES', color: 'bg-purple-400 dark:bg-purple-500' },
-    { id: 14, content: 'METTLE', category: 'HOMOPHONES OF MUSIC GENRES', color: 'bg-purple-400 dark:bg-purple-500' },
-    { id: 15, content: 'SEOUL', category: 'HOMOPHONES OF MUSIC GENRES', color: 'bg-purple-400 dark:bg-purple-500' },
-    { id: 16, content: 'WRAP', category: 'HOMOPHONES OF MUSIC GENRES', color: 'bg-purple-400 dark:bg-purple-500' },
-]
-
-const ConnectionsGame: React.FC = () => {
+const ConnectionsGame: React.FC<ConnectionsGameProps> = ({ gameId }) => {
+    const [gameData, setGameData] = useState<Card[]>([])
     const [cards, setCards] = useState<Card[]>([])
     const [selectedCards, setSelectedCards] = useState<number[]>([])
     const [solvedCategories, setSolvedCategories] = useState<string[]>([])
-    const [attempts, setAttempts] = useState(1)
+    const [attempts, setAttempts] = useState(4)
     const [gameOver, setGameOver] = useState(false)
+    const [gameWon, setGameWon] = useState(false)
     const [wrongGuess, setWrongGuess] = useState<number[]>([])
     const [previousGuesses, setPreviousGuesses] = useState<Set<string>>(new Set())
     const [showAllCategories, setShowAllCategories] = useState(false)
+
+    useEffect(() => {
+        console.log("GameId: ", gameId);
+        if (gameId) {
+            gamesService.getGameDataById("connections", gameId).then((game_data: any) => {
+                console.log("Game Data: ", game_data.game_data.data);
+                setGameData(game_data.game_data.data);
+            });
+        }
+    }, [gameId]);
 
     const currentGuessString = useMemo(() => {
         return [...selectedCards].sort().join(',')
     }, [selectedCards])
 
     useEffect(() => {
-        setCards(shuffle(initialCards))
-    }, [])
+        setCards(shuffle(gameData))
+    }, [gameData])
 
     const handleCardClick = (id: number) => {
         if (selectedCards.includes(id)) {
@@ -86,6 +89,7 @@ const ConnectionsGame: React.FC = () => {
 
             if (solvedCategories.length === 3) {
                 setGameOver(true)
+                setGameWon(true)
                 setShowAllCategories(true)
             }
         } else {
@@ -116,16 +120,16 @@ const ConnectionsGame: React.FC = () => {
         >
             <Card
                 className={`h-16 flex justify-center items-center cursor-pointer transition-all ${selectedCards.includes(card.id) ? 'ring-2 ring-primary bg-accent' : ''
-                    } ${wrongGuess.includes(card.id) ? 'animate-shake ring-2 ring-destructive' : ''}`}
+                    } ${wrongGuess.includes(card.id) ? 'animate-shake ring-2 ring-destructive' : ''} hover:bg-gray-200 dark:hover:bg-gray-700 text-center`}
                 onClick={() => handleCardClick(card.id)}
             >
-                <span className="font-semibold text-sm sm:text-base">{card.content}</span>
+                <span className="font-semibold text-sm sm:text-base break-words">{card.content}</span>
             </Card>
         </motion.div>
     )
 
     const renderCategories = () => {
-        const allCategories = [...new Set(initialCards.map(card => card.category))]
+        const allCategories = [...new Set(gameData.map(card => card.category))]
         return allCategories.map((category) => (
             <motion.div
                 key={category}
@@ -135,10 +139,10 @@ const ConnectionsGame: React.FC = () => {
                 transition={{ duration: 0.3 }}
                 className="mb-2 overflow-hidden"
             >
-                <div className={`rounded-lg p-4 ${initialCards.find(card => card.category === category)?.color}`}>
+                <div className={`rounded-lg p-4 ${difficultyColors[gameData.find(card => card.category === category)?.difficulty ?? 0]}`}>
                     <h3 className="font-bold text-center mb-1">{category}</h3>
                     <p className="text-center text-sm">
-                        {initialCards
+                        {gameData
                             .filter(card => card.category === category)
                             .map(card => card.content)
                             .join(', ')}
@@ -158,12 +162,7 @@ const ConnectionsGame: React.FC = () => {
                                 {attempts} {attempts === 1 ? 'attempt' : 'attempts'} remaining
                             </span>
                         </div>
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-primary transition-all duration-300"
-                                style={{ width: `${(attempts / 4) * 100}%` }}
-                            />
-                        </div>
+                        <Progress value={(attempts / 4) * 100} /> {/* Replace the existing progress bar with Shadcn Progress */}
                     </div>
 
                     <AnimatePresence>
@@ -176,10 +175,10 @@ const ConnectionsGame: React.FC = () => {
                                 transition={{ duration: 0.3 }}
                                 className="mb-2 overflow-hidden"
                             >
-                                <div className={`rounded-lg p-4 ${initialCards.find(card => card.category === category)?.color}`}>
+                                <div className={`rounded-lg p-4 ${difficultyColors[gameData?.find(card => card.category === category)?.difficulty ?? 0]}`}>
                                     <h3 className="font-bold text-center mb-1">{category}</h3>
                                     <p className="text-center text-sm">
-                                        {initialCards
+                                        {gameData
                                             .filter(card => card.category === category)
                                             .map(card => card.content)
                                             .join(', ')}
@@ -218,7 +217,11 @@ const ConnectionsGame: React.FC = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                 >
-                    <h1 className="text-2xl mb-4 text-center">Unfortunate 🥲</h1>
+                    {gameWon ? (
+                        <h1 className="text-2xl mb-4 text-center">Congratulations! 🎉</h1>
+                    ) : (
+                        <h1 className="text-2xl mb-4 text-center">Unfortunate 🥲</h1>
+                    )}
                     {renderCategories()}
                     <div className="text-center mt-6">
                         <Button variant="outline" className="mx-auto">
@@ -232,4 +235,3 @@ const ConnectionsGame: React.FC = () => {
 }
 
 export default ConnectionsGame
-

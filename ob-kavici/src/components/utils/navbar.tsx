@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
 
     return (
         <div className="flex items-center justify-between p-5 bg-background text-foreground">
-            <Link to="/" className="text-4xl font-cursive">ob-kavici</Link>
+            <Link to="/" className="text-4xl font-cursive hover:text-amber-400">ob-kavici</Link>
             <div className="flex items-center space-x-4">
                 <ModeToggle />
                 {user ? (
