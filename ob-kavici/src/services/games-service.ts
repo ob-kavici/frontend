@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
-class GamesApiService {
+class GamesService {
     private axiosInstance: AxiosInstance;
 
     constructor() {
@@ -83,4 +83,4 @@ class GamesApiService {
     // }
 }
 
-export default new GamesApiService();
+export default new GamesService();

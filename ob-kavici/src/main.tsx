@@ -10,6 +10,7 @@ import Games from './components/games/game-type-list.tsx';
 import UserProfile from './components/auth/user-profile.tsx';
 import AuthPage from './components/auth/auth-page.tsx';
 import Layout from '@/components/utils/layout.tsx';
+import { Toaster } from './components/ui/toaster.tsx';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <RouterProvider router={router} />
+      <Toaster />
     </ThemeProvider>
   </StrictMode>,
 );

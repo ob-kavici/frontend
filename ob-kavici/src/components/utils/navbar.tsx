@@ -7,8 +7,8 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ModeToggle } from './mode-toggle';
 import { Link, useNavigate } from 'react-router-dom';
-import { logout } from '@/utils/auth';
-import { supabase } from '@/utils/supabase';
+import { logout } from '@/services/auth-service';
+import { supabase } from '@/services/supabase-service';
 import { Button } from '../ui/button';
 
 const Navbar: React.FC = () => {
@@ -42,7 +42,7 @@ const Navbar: React.FC = () => {
     const handleLogout = async () => {
         await logout();
         setUser(null);
-        navigate('/auth');
+        navigate('/');
     };
 
     return (

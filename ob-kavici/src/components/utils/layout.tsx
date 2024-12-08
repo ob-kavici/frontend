@@ -1,6 +1,5 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Toaster } from '../ui/toaster';
 import Navbar from './navbar';
 
 const Layout: React.FC = () => {
@@ -10,7 +9,6 @@ const Layout: React.FC = () => {
             <main>
                 <Outlet />
             </main>
-            <Toaster />
         </div>
     )
 };
