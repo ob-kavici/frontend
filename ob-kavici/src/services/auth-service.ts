@@ -9,9 +9,7 @@ export const login = async (identifier: string, password: string) => {
       .select('email')
       .eq('username', identifier)
       .single();
-    console.log(error)
     if (error || !data) {
-      console.log(error)
       return error;
     }
 
