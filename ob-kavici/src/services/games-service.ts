@@ -5,7 +5,7 @@ class GamesService {
 
     constructor() {
         this.axiosInstance = axios.create({
-            baseURL: 'http://localhost:8000/games', // Replace with your API base URL
+            baseURL: import.meta.env.VITE_GAMES_SERVICE_URL,
             headers: {
                 'Content-Type': 'application/json',
             },
