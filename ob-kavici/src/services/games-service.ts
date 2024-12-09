@@ -5,7 +5,7 @@ class GamesService {
 
     constructor() {
         this.axiosInstance = axios.create({
-            baseURL: import.meta.env.VITE_GAMES_SERVICE_URL,
+            baseURL: import.meta.env.VITE_GAMES_SERVICE_URL + '/games',
             headers: {
                 'Content-Type': 'application/json',
             },

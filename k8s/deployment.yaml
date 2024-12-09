@@ -21,7 +21,7 @@ spec:
             - containerPort: 80
           env:
             - name: VITE_GAMES_SERVICE_URL
-              value: "http://games-service"
+              value: "http://games-service.default.svc.cluster.local"
           envFrom:
             - secretRef:
                 name: frontend-secrets
