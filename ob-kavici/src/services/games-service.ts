@@ -53,6 +53,7 @@ class GamesService {
     }
 
     public async getDailyGame(gameType: string) {
+        console.log("Sending request to", `${this.axiosInstance.defaults.baseURL}/${gameType}/daily`);
         try {
             const response = await this.axiosInstance.get(`/${gameType}/daily`);
             return response.data;
