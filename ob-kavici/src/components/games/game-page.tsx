@@ -25,6 +25,7 @@ const GamePage = () => {
 
     useEffect(() => {
         console.log("GameType: ", gameType);
+        console.log(import.meta.env.VITE_GAMES_SERVICE_URL);
         if (gameType) {
             setLoading(true);
             gamesService.getDailyGame(gameType)
