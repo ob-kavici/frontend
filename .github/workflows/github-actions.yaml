@@ -35,12 +35,12 @@ jobs:
       - name: Use context
         run: kubectl config use-context obKaviciAKS
 
-      -name: Apply Kubernetes Secret
-      run: |
-        kubectl create secret generic frontend-secrets \
-        --from-literal=VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-        --from-literal=VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
-        --dry-run=client -o yaml | kubectl apply -f -
+      - name: Apply Kubernetes Secret
+        run: |
+          kubectl create secret generic frontend-secrets \
+          --from-literal=VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+          --from-literal=VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
+          --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy Frontend to AKS
         run: |
