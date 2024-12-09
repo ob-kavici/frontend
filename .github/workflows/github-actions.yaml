@@ -13,6 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Print current branch and files
+        run: |
+          git branch
+          git log -1
+          ls -al
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
