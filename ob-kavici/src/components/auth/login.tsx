@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
+import { paths } from '@/config/paths';
 
 const loginSchema = z.object({
     identifier: z.string().min(3, { message: 'Identifier must be at least 3 characters' }),
@@ -24,11 +25,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-interface LoginProps {
-    switchToRegister: () => void;
-}
-
-const Login: React.FC<LoginProps> = ({ switchToRegister }) => {
+const Login: React.FC = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -46,7 +43,7 @@ const Login: React.FC<LoginProps> = ({ switchToRegister }) => {
             toast({ title: 'Login Error', description: 'Invalid credentials', variant: 'destructive' });
         } else {
             toast({ title: 'Success', description: `Welcome, ${data.identifier}!` });
-            navigate('/');
+            navigate(paths.games.root.getHref(), { replace: true });
         }
     };
 
@@ -92,9 +89,11 @@ const Login: React.FC<LoginProps> = ({ switchToRegister }) => {
                 <div className="text-center mt-4">
                     <p>
                         Don't have an account?{' '}
-                        <Button variant="link" onClick={switchToRegister}>
-                            Register here
-                        </Button>
+                        <Link to={paths.auth.register.getHref()}>
+                            <Button variant="link">
+                                Register here
+                            </Button>
+                        </Link>
                     </p>
                 </div>
             </CardContent>

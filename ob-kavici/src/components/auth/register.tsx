@@ -15,6 +15,9 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { paths } from '@/config/paths';
 
 const registerSchema = z.object({
     username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
@@ -24,12 +27,9 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-interface RegisterProps {
-    switchToLogin: () => void;
-}
-
-const Register: React.FC<RegisterProps> = ({ switchToLogin }) => {
+const Register: React.FC = () => {
     const { toast } = useToast();
+    const navigate = useNavigate(); // Moved outside the handleRegister function
 
     const form = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
@@ -47,7 +47,7 @@ const Register: React.FC<RegisterProps> = ({ switchToLogin }) => {
             toast({ title: 'Registration Error', description: error.message, variant: 'destructive' });
         } else {
             toast({ title: 'Success', description: 'You may now log in to your account.' });
-            switchToLogin();
+            navigate(paths.auth.login.getHref()); // Fixed: Call navigate from the hook defined at the top level
         }
     };
 
@@ -106,9 +106,11 @@ const Register: React.FC<RegisterProps> = ({ switchToLogin }) => {
                 <div className="text-center mt-4">
                     <p>
                         Already have an account?{' '}
-                        <Button variant="link" onClick={switchToLogin}>
-                            Login here
-                        </Button>
+                        <Link to={paths.auth.login.getHref()}>
+                            <Button variant="link">
+                                Login here
+                            </Button>
+                        </Link>
                     </p>
                 </div>
             </CardContent>
