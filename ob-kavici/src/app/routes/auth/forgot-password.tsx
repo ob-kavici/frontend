@@ -1,4 +1,4 @@
-import ForgotPassword from "@/components/auth/forgot-password";
+import ForgotPassword from "@/features/auth/forgot-password";
 import { AuthLayout } from "@/components/layouts/auth-layout";
 
 

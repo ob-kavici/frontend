@@ -44,17 +44,15 @@ export const createAppRouter = (queryClient: QueryClient) => {
         },
         {
             path: paths.games.root.path,
-            lazy: () => import('./routes/games/games').then(convert(queryClient)),
-            children: [
-                {
-                    path: paths.games.gameHome.path,
-                    lazy: () => import('./routes/games/game-home').then(convert(queryClient)),
-                },
-                {
-                    path: paths.games.game.path,
-                    lazy: () => import('./routes/games/game').then(convert(queryClient)),
-                },
-            ],
+            lazy: () => import('./routes/games/games-home').then(convert(queryClient)),
+        },
+        {
+            path: paths.games.gameHome.path,
+            lazy: () => import('./routes/games/game-overview').then(convert(queryClient)),
+        },
+        {
+            path: paths.games.game.path,
+            lazy: () => import('./routes/games/game').then(convert(queryClient)),
         },
     ]);
 }

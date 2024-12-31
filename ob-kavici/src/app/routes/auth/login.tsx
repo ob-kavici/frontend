@@ -1,4 +1,4 @@
-import Login from "@/components/auth/login";
+import Login from "@/features/auth/login";
 import { AuthLayout } from "@/components/layouts/auth-layout";
 
 const LoginRoute = () => {

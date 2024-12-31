@@ -1,19 +1,20 @@
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Button } from '../ui/button';
-import { GameType } from '@/types/GameType';
+import { Button } from '@/components/ui/button';
+import { GameType } from '@/types/games';
 
 import ConnectionsIcon from '@/assets/icons/connections.svg';
 import LetterBoxedIcon from '@/assets/icons/letter-boxed.svg';
 import SpellingBeeIcon from '@/assets/icons/spelling-bee.svg';
 import StrandsIcon from '@/assets/icons/strands.svg';
+import { paths } from '@/config/paths';
 
 const icons: Record<string, string> = {
-    connections: ConnectionsIcon,
+    'connections': ConnectionsIcon,
     'letter-boxed': LetterBoxedIcon,
     'spelling-bee': SpellingBeeIcon,
-    strands: StrandsIcon,
+    'strands': StrandsIcon,
 };
 
 interface GameTypeCardProps {
@@ -31,7 +32,7 @@ const GameTypeCard: React.FC<GameTypeCardProps> = ({ gameType }) => {
             </CardContent>
             <CardFooter>
                 {gameType.is_active ? (
-                    <Link to={`/games/${gameType.id}`}>
+                    <Link to={paths.games.gameHome.getHref(gameType.id)}>
                         <Button variant="outline">Play</Button>
                     </Link>
                 ) : (

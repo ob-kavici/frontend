@@ -34,11 +34,11 @@ export const paths = {
             getHref: () => '/games',
         },
         gameHome: {
-            path: '/games/:gameType',
+            path: '/games/:gameTypeId',
             getHref: (gameType: string) => `/games/${gameType}`,
         },
         game: {
-            path: '/games/:gameType/:gameId',
+            path: '/games/:gameTypeId/:gameId',
             getHref: (gameType: string, gameId: string) => `/games/${gameType}/${gameId}`,
         },
     },

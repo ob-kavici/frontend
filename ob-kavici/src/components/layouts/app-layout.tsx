@@ -1,4 +1,5 @@
 import Navbar from "@/components/utils/navbar";
+import { paths } from "@/config/paths";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -7,7 +8,7 @@ interface LayoutProps {
 export const AppLayout = ({ children }: LayoutProps) => {
     return (
         <>
-            <Navbar />
+            <Navbar title="ob-kavici" linkTo={paths.home.getHref()} />
             {children}
         </>
     );

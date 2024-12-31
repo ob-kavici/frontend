@@ -1,4 +1,4 @@
-import Register from "@/components/auth/register";
+import Register from "@/features/auth/register";
 import { AuthLayout } from "@/components/layouts/auth-layout";
 
 const RegisterRoute = () => {

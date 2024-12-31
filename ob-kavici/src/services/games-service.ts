@@ -1,3 +1,4 @@
+import { Game, GameMetadata, GameType } from '@/types/games';
 import axios, { AxiosInstance } from 'axios';
 
 class GamesService {
@@ -5,92 +6,52 @@ class GamesService {
 
     constructor() {
         this.axiosInstance = axios.create({
-            baseURL: import.meta.env.VITE_GAMES_SERVICE_URL,
+            baseURL: import.meta.env.VITE_GAMES_SERVICE_URL + '/games',
             headers: {
                 'Content-Type': 'application/json',
             },
         });
     }
 
-    public async getGameTypes() {
+    public async getGameTypes(gameTypeId?: string): Promise<GameType[] | GameType> {
         try {
-            const response = await this.axiosInstance.get('/game-types');
+            const response = await this.axiosInstance.get('/game-types', {
+                params: gameTypeId ? { "game_type_id": gameTypeId } : undefined,
+            });
             return response.data;
         } catch (error) {
-            console.error('Error fetching game types:', error);
             throw error;
         }
     }
 
-    public async getGames() {
+    public async getActiveGames(gameTypeId?: string): Promise<GameMetadata[]> {
         try {
-            const response = await this.axiosInstance.get('/');
+            const response = await this.axiosInstance.get('/', {
+                params: gameTypeId ? { "game_type_id": gameTypeId } : undefined,
+            });
             return response.data;
         } catch (error) {
-            console.error('Error fetching games:', error);
             throw error;
         }
     }
 
-    public async getGamesByType(gameType: string) {
-        try {
-            const response = await this.axiosInstance.get(`/${gameType}`);
-            return response.data;
-        } catch (error) {
-            console.error(`Error fetching games of type ${gameType}:`, error);
-            throw error;
-        }
-    }
-
-    public async getGameDataById(gameType: string, gameId: string) {
-        try {
-            const response = await this.axiosInstance.get(`/${gameType}/${gameId}`);
-            return response.data;
-        } catch (error) {
-            console.error(`Error fetching game with ID ${gameId}:`, error);
-            throw error;
-        }
-    }
-
-    public async getDailyGame(gameType: string) {
+    public async getDailyGame(gameType: string): Promise<Game> {
         try {
             const response = await this.axiosInstance.get(`/${gameType}/daily`);
             return response.data;
         } catch (error) {
-            console.error(`Error fetching daily game of type ${gameType}:`, error);
             throw error;
         }
     }
 
-    // public async createGame(gameData: any) {
-    //     try {
-    //         const response = await this.axiosInstance.post('/games', gameData);
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error('Error creating game:', error);
-    //         throw error;
-    //     }
-    // }
-
-    // public async updateGame(gameId: string, gameData: any) {
-    //     try {
-    //         const response = await this.axiosInstance.put(`/games/${gameId}`, gameData);
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error(`Error updating game with ID ${gameId}:`, error);
-    //         throw error;
-    //     }
-    // }
-
-    // public async deleteGame(gameId: string) {
-    //     try {
-    //         const response = await this.axiosInstance.delete(`/games/${gameId}`);
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error(`Error deleting game with ID ${gameId}:`, error);
-    //         throw error;
-    //     }
-    // }
+    public async getGame(gameType: string, gameId: string): Promise<Game> {
+        try {
+            const response = await this.axiosInstance.get(`/${gameType}/${gameId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default new GamesService();

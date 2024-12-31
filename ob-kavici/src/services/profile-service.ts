@@ -1,9 +1,8 @@
 import { supabase } from '@/services/supabase-service';
-import { UserProfile } from '@/types/UserProfile';
+import { UserProfile } from '@/types/users';
 
 class ProfileService {
-    // Fetch a single user profile by user ID
-    async getProfileById(userId: string): Promise<UserProfile | null> {
+    async getProfile(userId: string): Promise<UserProfile | null> {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
@@ -11,19 +10,16 @@ class ProfileService {
             .single();
 
         if (error) {
-            console.error('Error fetching profile:', error.message);
             return null;
         }
 
         return data;
     }
 
-    // Fetch all user profiles
     async getAllProfiles(): Promise<UserProfile[] | null> {
         const { data, error } = await supabase.from('profiles').select('*');
 
         if (error) {
-            console.error('Error fetching profiles:', error.message);
             return null;
         }
 

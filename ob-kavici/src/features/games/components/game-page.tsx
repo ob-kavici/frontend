@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
-import NotFound from '../utils/not-found';
+import NotFound from '@/components/utils/not-found';
 import { Skeleton } from '@/components/ui/skeleton';
 import gamesService from '@/services/games-service';
 
 const gameComponents: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
-    'connections': React.lazy(() => import('./connections/connections-game')),
-    'letter-boxed': React.lazy(() => import('./letter-boxed/letter-boxed-game')),
+    'connections': React.lazy(() => import('@/features/games/components/connections')),
+    'letter-boxed': React.lazy(() => import('@/features/games/components/letter-boxed')),
 };
 
 const gameDescriptions: Record<string, string> = {
@@ -20,24 +20,16 @@ const GamePage = () => {
     const { gameType } = useParams<{ gameType: string }>();
 
     useEffect(() => {
-        console.log("GameMetadata updated: ", gameMetadata);
-      }, [gameMetadata]);
-
-    useEffect(() => {
-        console.log("GameType: ", gameType);
         if (gameType) {
             setLoading(true);
             gamesService.getDailyGame(gameType)
                 .then((game: any) => {
-                    console.log("Game: ", game);
                     setGameMetadata(game);
-                    console.log("GameMetadata: ", gameMetadata);
                 })
                 .catch((error) => {
-                    console.error("Error fetching game data:", error);
+                    console.error("Error fetching game metadata: ", error);
                 })
                 .finally(() => {
-                    console.log("GameMetadata: ", gameMetadata);
                     setLoading(false);
                 });
         }
