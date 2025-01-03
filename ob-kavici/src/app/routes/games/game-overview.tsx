@@ -1,12 +1,12 @@
-import { GameLayout } from "@/components/layouts/game-layout";
+import { AppLayout } from "@/components/layouts/app-layout";
 import GameHome from "@/features/games/components/game-home";
 
 
 const GameOverviewRoute = () => {
     return (
-        <GameLayout>
+        <AppLayout>
             <GameHome />
-        </GameLayout>
+        </AppLayout>
     );
 }
 

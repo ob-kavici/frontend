@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" aria-hidden="true" role="img" preserveAspectRatio="xMidYMid meet">
+    <circle cx="128" cy="128" r="128" fill="black" />
+    <path
+        d="M96 0C128 64 128 192 96 256"
+        stroke="white"
+        stroke-width="40"
+        fill="none"
+    />
+</svg>

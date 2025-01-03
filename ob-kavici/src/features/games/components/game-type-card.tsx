@@ -28,15 +28,15 @@ const GameTypeCard: React.FC<GameTypeCardProps> = ({ gameType }) => {
                 <CardTitle>{gameType.title}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-                <img src={icons[gameType.id]} alt={`${gameType.id} icon`} className="w-16 h-16" />
+                <img src={icons[gameType.id]} alt={`${gameType.id} icon`} className="w-28 h-28" />
             </CardContent>
             <CardFooter>
                 {gameType.is_active ? (
                     <Link to={paths.games.gameHome.getHref(gameType.id)}>
-                        <Button variant="outline">Play</Button>
+                        <Button variant="outline">Igraj</Button>
                     </Link>
                 ) : (
-                    <Button variant="outline" disabled>Coming soon</Button>
+                    <Button variant="outline" disabled>Kmalu na voljo</Button>
                 )}
             </CardFooter>
         </Card>

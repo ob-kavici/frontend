@@ -36,6 +36,7 @@ class GamesService {
     }
 
     public async getDailyGame(gameType: string): Promise<Game> {
+        console.log("Game Type: ", gameType);
         try {
             const response = await this.axiosInstance.get(`/${gameType}/daily`);
             return response.data;

@@ -24,8 +24,14 @@ export const paths = {
     },
 
     profile: {
-        path: '/profile',
-        getHref: () => '/profile',
+        root: {
+            path: '/profile',
+            getHref: () => '/profile',
+        },
+        editor: {
+            path: '/profile/:username',
+            getHref: (username: string) => `/profile/${username}`,
+        },
     },
 
     games: {
