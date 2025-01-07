@@ -1,3 +1,5 @@
+import { ConnectionsGameData, ConnectionsGameState } from "./connections";
+
 export enum GameStatus {
     ACTIVE = "active",
     ARCHIVED = "archived",
@@ -22,5 +24,15 @@ export interface GameMetadata {
 }
 
 export interface Game extends GameMetadata {
-    game_data?: Record<string, any>;
+    game_data: ConnectionsGameData;
+}
+
+export interface GameState {
+    game_id: number;
+    user_id: string;
+    started_at: Date;
+    ended_at?: Date;
+    game_completed: boolean;
+    game_won: boolean;
+    game_data?: ConnectionsGameState;
 }

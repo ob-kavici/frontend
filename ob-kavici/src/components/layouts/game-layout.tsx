@@ -4,7 +4,7 @@ import { paths } from "@/config/paths";
 import ProfileService from "@/services/profile-service";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 

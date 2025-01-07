@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     Avatar,
     AvatarFallback,
@@ -8,10 +8,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ModeToggle } from './mode-toggle';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '@/services/auth-service';
-import { supabase } from '@/services/supabase-service';
 import { Button } from '../ui/button';
-import { toast } from '@/hooks/use-toast';
-import ProfileService from '@/services/profile-service';
+import { toast } from '@/lib/hooks/use-toast';
+import { useUser } from '@/lib/contexts/user-context';
 
 interface NavbarProps {
     title: string;
@@ -19,54 +18,18 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ title, linkTo }) => {
-    const [user, setUser] = useState<any>(null);
-    const [username, setUsername] = useState<string | null>(null);
+    const { user, username, setUser, setUsername } = useUser();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const { data, error } = await supabase.auth.getUser();
-            if (error?.status === 500) {
-                toast({ title: 'Napaka strežnika', description: 'Avtentikacija trenutno ni na voljo', variant: 'destructive' });
-            } else {
-                const userData = data?.user;
-                setUser(userData);
-
-                if (userData) {
-                    try {
-                        const profile = await ProfileService.getProfile(userData.id);
-                        setUsername(profile?.username || null);
-                    } catch (error) {
-                        toast({ title: 'Napaka', description: 'Ni mogoče naložiti uporabniškega imena', variant: 'destructive' });
-                    }
-                }
-            }
-        };
-
-        fetchUser();
-
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user || null);
-
-            if (session?.user) {
-                ProfileService.getProfile(session.user.id)
-                    .then((profile) => setUsername(profile?.username || null))
-                    .catch(() => toast({ title: 'Napaka', description: 'Ni mogoče naložiti uporabniškega imena', variant: 'destructive' }));
-            } else {
-                setUsername(null);
-            }
-        });
-
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, []);
-
     const handleLogout = async () => {
-        await logout();
-        setUser(null);
-        setUsername(null);
-        navigate('/');
+        const error = await logout();
+        if (!error) {
+            setUser(null);
+            setUsername(null);
+            navigate('/');
+        } else {
+            toast({ title: 'Napaka', description: 'Odjava ni uspela', variant: 'destructive' });
+        }
     };
 
     return (

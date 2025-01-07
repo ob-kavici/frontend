@@ -1,24 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import GamesService from "@/services/games-service";
-import { GameLayout } from "@/components/layouts/game-layout";
-import Connections from "@/features/games/components/connections";
-import LetterBoxed from "@/features/games/components/letter-boxed";
-import SpellingBee from "@/features/games/components/spelling-bee";
-import Strands from "@/features/games/components/strands";
+import { Game, GameState } from "@/types/games";
+import Connections from "@/features/connections/components/connections";
 import NotFound from "@/components/utils/not-found";
+import { GameLayout } from "@/components/layouts/game-layout";
 import { gameTypes } from "@/features/games/config/game-types";
-
-const gameComponents: Record<string, React.FC<any>> = {
-    "connections": Connections,
-    "letter-boxed": LetterBoxed,
-    "spelling-bee": SpellingBee,
-    "strands": Strands,
-};
 
 const GameRoute: React.FC = () => {
     const { gameTypeId } = useParams<{ gameTypeId: string }>();
-    const [game, setGame] = useState<any | null>(null);
+    const [game, setGame] = useState<Game | null>(null);
+    const [gameState, setGameState] = useState<GameState | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -26,10 +18,15 @@ const GameRoute: React.FC = () => {
 
         const fetchGame = async () => {
             try {
-                const dailyGame = await GamesService.getDailyGame(gameTypeId);
-                setGame(dailyGame);
-            } catch {
+                const fetchedGame = await GamesService.getDailyGame(gameTypeId);
+                setGame(fetchedGame);
+
+                const fetchedGameState = await GamesService.getOrInitializeGameState(fetchedGame);
+                console.log(fetchedGameState);
+                setGameState(fetchedGameState);
+            } catch (error) {
                 setGame(null);
+                setGameState(null);
             } finally {
                 setLoading(false);
             }
@@ -38,18 +35,40 @@ const GameRoute: React.FC = () => {
         fetchGame();
     }, [gameTypeId]);
 
-    if (!gameTypeId) {
+
+    const updateGameState = async (updatedState: Partial<GameState>) => {
+        if (!gameState) return;
+
+        // Update the local state
+        setGameState((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                ...updatedState,
+            };
+        });
+
+        // Persist the updated state
+        await GamesService.updateGameState({
+            ...gameState,
+            ...updatedState,
+        });
+    };
+
+    if (!gameTypeId || (!loading && !game)) {
         return <NotFound />;
     }
 
-    const SelectedGameComponent = gameComponents[gameTypeId];
-    const gameType = gameTypes.find((type) => type.id === gameTypeId);
-
     return (
-        <GameLayout game={game} gameTypeTitle={gameType?.title || ""}>
-            {loading && <div>Nalaganje...</div>}
-            {!loading && game && SelectedGameComponent && <SelectedGameComponent {...game} />}
-            {!loading && !game && <NotFound />}
+        <GameLayout game={game} gameTypeTitle={gameTypes.find((type) => type.id === gameTypeId)?.title || ""}>
+            {loading && <div>Loading...</div>}
+            {!loading && game && gameState && (
+                <Connections
+                    game={game}
+                    gameState={gameState}
+                    onUpdateGameState={updateGameState}
+                />
+            )}
         </GameLayout>
     );
 };
