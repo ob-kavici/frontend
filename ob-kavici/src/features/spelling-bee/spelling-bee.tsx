@@ -1,19 +1,10 @@
 import { Game } from '@/types/games';
 import React from 'react';
 
-const SpellingBee: React.FC<Game> = ({ game_data }) => {
+const SpellingBee: React.FC<Game> = () => {
     return (
         <div>
             <h1>Spelling Bee Game</h1>
-            {/* Game implementation will go here */}
-            {game_data ? (
-                <div>
-                    <p>{game_data.description}</p>
-                    {/* Additional game data rendering can go here */}
-                </div>
-            ) : (
-                <p>No game data available.</p>
-            )}
         </div>
     );
 };

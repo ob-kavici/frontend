@@ -17,7 +17,7 @@ export interface GameMetadata {
     id: number;
     created_at: Date;
     status: GameStatus;
-    editor_id?: string;
+    editor_id: string | null;
     stars: number;
     game_type_id: string;
     game_date?: Date;

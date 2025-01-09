@@ -23,7 +23,7 @@ const GameRoute: React.FC = () => {
 
                 const fetchedGameState = await GamesService.getOrInitializeGameState(fetchedGame.id);
                 setGameState(fetchedGameState);
-            } catch (error) {
+            } catch {
                 setGame(null);
                 setGameState(null);
             } finally {

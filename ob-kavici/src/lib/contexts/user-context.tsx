@@ -6,14 +6,14 @@ import { User } from "@supabase/supabase-js";
 interface UserContextProps {
     user: User | null;
     username: string | null;
-    setUser: (user: any) => void;
+    setUser: (user: User | null) => void;
     setUsername: (username: string | null) => void;
 }
 
 const UserContext = createContext<UserContextProps | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [username, setUsername] = useState<string | null>(null);
 
     useEffect(() => {

@@ -3,7 +3,7 @@ import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom"
 
-
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const convert = (queryClient: QueryClient) => (m: any) => {
     const { clientLoader, clientAction, default: Component, ...rest } = m;
     return {
