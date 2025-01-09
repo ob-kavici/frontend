@@ -36,9 +36,9 @@ jobs:
       - name: Build and push Docker image
         run: |
           TAG=$(git rev-parse --short HEAD)  # Use the short commit hash as the tag
-          docker build --build-arg VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} -t kofolmarko/frontend:$TAG -t kofolmarko/frontend:latest .
-          docker push kofolmarko/frontend:$TAG
-          docker push kofolmarko/frontend:latest
+          docker build --build-arg VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} -t kofolmarko/ob-kavici-frontend:$TAG -t kofolmarko/ob-kavici-frontend:latest .
+          docker push kofolmarko/ob-kavici-frontend:$TAG
+          docker push kofolmarko/ob-kavici-frontend:latest
 
       # Step 6: Set up Kubeconfig for Kubernetes access
       - name: Set up Kubeconfig
@@ -63,5 +63,5 @@ jobs:
       - name: Deploy Frontend to AKS
         run: |
           TAG=$(git rev-parse --short HEAD)  # Use the same tag for deployment
-          kubectl set image deployment/frontend frontend=kofolmarko/frontend:$TAG --record
+          kubectl set image deployment/frontend frontend=kofolmarko/ob-kavici-frontend:$TAG --record
           kubectl rollout status deployment/frontend

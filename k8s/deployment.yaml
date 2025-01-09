@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: kofolmarko/frontend:<IMAGE_TAG>  # Placeholder for dynamic tag
+          image: kofolmarko/ob-kavici-frontend:<IMAGE_TAG>  # Placeholder for dynamic tag
           ports:
             - containerPort: 80
           env:
