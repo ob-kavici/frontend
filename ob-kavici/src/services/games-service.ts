@@ -1,7 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { Game, GameState, GameType } from '@/types/games';
-import { ConnectionsGameState, ConnectionsGameData } from '@/types/connections';
-import { getJwt } from './auth-service';
+import { getJwt, getRefreshToken } from './auth-service';
 
 class GamesService {
     private axiosInstance: AxiosInstance;
@@ -13,20 +12,39 @@ class GamesService {
         });
     }
 
-    private async withAuthHeader() {
-        const token = await getJwt();
-        return token ? { Authorization: `Bearer ${token}` } : {};
+    // Centralized method for generating headers with auth
+    private async getAuthHeaders() {
+        const jwt = await getJwt();
+        const refreshToken = await getRefreshToken();
+
+        if (!jwt || !refreshToken) {
+            throw new Error('Missing authentication tokens.');
+        }
+
+        return {
+            Authorization: `Bearer ${jwt}`,
+            'x-refresh-token': refreshToken,
+        };
     }
 
     private saveToLocalStorage(gameId: number, gameState: GameState) {
         const localData = JSON.parse(localStorage.getItem('gameStates') || '{}');
-        localData[gameId] = gameState;
+        const serializedGameState = {
+            ...gameState,
+            started_at: gameState.started_at ? new Date(gameState.started_at).toISOString() : null,
+            ended_at: gameState.ended_at ? new Date(gameState.ended_at).toISOString() : null,
+        };
+        localData[gameId] = serializedGameState;
         localStorage.setItem('gameStates', JSON.stringify(localData));
     }
 
     private loadFromLocalStorage(gameId: number): GameState | null {
         const localData = JSON.parse(localStorage.getItem('gameStates') || '{}');
-        return localData[gameId] || null;
+        const rawGameState = localData[gameId];
+        if (!rawGameState) return null;
+
+        // No conversion needed for ISO strings as they match `timestampz`
+        return rawGameState;
     }
 
     private clearLocalStorage(gameId: number) {
@@ -43,15 +61,17 @@ class GamesService {
     }
 
     public async getDailyGame(gameType: string): Promise<Game> {
-        const response = await this.axiosInstance.get(`/${gameType}/daily`);
+        console.log("Get daily game", gameType);
+        const response = await this.axiosInstance.get(`/${gameType}/daily`,);
         return response.data;
     }
 
     public async getGameState(gameId: number): Promise<GameState | null> {
+        console.log("Get game state", gameId);
         const userId = await this.getUserId();
 
         if (userId) {
-            const headers = await this.withAuthHeader();
+            const headers = await this.getAuthHeaders();
             const response = await this.axiosInstance.get('/state', {
                 params: { user_id: userId, game_id: gameId },
                 headers,
@@ -62,15 +82,17 @@ class GamesService {
         }
     }
 
-    public async getOrInitializeGameState(game: Game): Promise<GameState> {
-        const existingState = await this.getGameState(game.id);
+    public async getOrInitializeGameState(gameId: number): Promise<GameState> {
+        console.log("Get or initialize game state", gameId);
+        // TODO check
+        const existingState = await this.getGameState(gameId);
 
         if (existingState) {
             return existingState;
         }
 
         const newState: GameState = {
-            game_id: game.id,
+            game_id: gameId,
             user_id: (await this.getUserId()) || 'anonymous',
             started_at: new Date(),
             game_completed: false,
@@ -78,57 +100,27 @@ class GamesService {
         };
 
         if (await this.getUserId()) {
-            const headers = await this.withAuthHeader();
-            const response = await this.axiosInstance.post('/start', newState, { headers });
+            const headers = await this.getAuthHeaders();
+            const response = await this.axiosInstance.post('/state', newState, { headers });
             return response.data;
         } else {
-            this.saveToLocalStorage(game.id, newState);
+            this.saveToLocalStorage(gameId, newState);
             return newState;
         }
     }
 
     public async updateGameState(gameState: GameState): Promise<void> {
-        const userId = await this.getUserId();
-        const headers = await this.withAuthHeader();
-
-        if (userId) {
-            // Update state for authenticated users
-            await this.axiosInstance.post('/update', gameState, { headers });
-        } else {
-            // Update state for unauthenticated users
+        console.log("Update game state", gameState);
+        if (gameState.user_id === 'anonymous') {
             this.saveToLocalStorage(gameState.game_id, gameState);
+            return;
         }
+
+        const headers = await this.getAuthHeaders();
+        await this.axiosInstance.post('/state', gameState, { headers });
     }
 
-    public async endGame(gameId: number, gameWon: boolean): Promise<GameState> {
-        const userId = await this.getUserId();
-        const headers = await this.withAuthHeader();
-
-        if (userId) {
-            // End game for authenticated users
-            const response = await this.axiosInstance.post('/end', {
-                game_id: gameId,
-                game_won: gameWon,
-            }, { headers });
-            return response.data;
-        } else {
-            // End game for unauthenticated users
-            const localState = this.loadFromLocalStorage(gameId);
-            if (!localState) throw new Error('Game state not found in localStorage.');
-
-            const updatedState = {
-                ...localState,
-                ended_at: new Date(),
-                game_completed: true,
-                game_won: gameWon,
-            };
-            this.saveToLocalStorage(gameId, updatedState);
-            return updatedState;
-        }
-    }
-
-    // TODO move this method to a separate service
-    // TODO also check the way how the user ID is obtained
+    // Centralized method to get the user ID
     private async getUserId(): Promise<string | null> {
         const token = await getJwt();
         if (!token) return null;

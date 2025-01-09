@@ -55,3 +55,14 @@ export const getJwt = async (): Promise<string | null> => {
   }
   return data?.session?.access_token || null;
 };
+
+export const getRefreshToken = async (): Promise<string | null> => {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    toast({ title: 'Napaka', description: 'Seja je potekla', variant: 'destructive' });
+    const navigate = useNavigate();
+    navigate('/login');
+    return null;
+  }
+  return data?.session?.refresh_token || null;
+}

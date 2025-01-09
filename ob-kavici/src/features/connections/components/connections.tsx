@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Game, GameState } from "@/types/games";
-import { ConnectionsGameState, ConnectionsCard } from "@/types/connections";
+import { ConnectionsCard } from "@/types/connections";
 import AnimatedCard from "./animated-card";
 import GameInfo from "./game-info";
 import ActionButtons from "./action-buttons";
@@ -11,33 +11,20 @@ import { difficultyColors } from "../config/difficulty-colors";
 interface ConnectionsProps {
     game: Game;
     gameState: GameState | null; // Game state can be null for a new game
-    onUpdateGameState: (updates: Partial<GameState>) => void;
+    onUpdateGameState: (updates: Partial<GameState>) => Promise<void>;
+    isNewGame: boolean;
 }
 
-const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGameState }) => {
+const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGameState, isNewGame }) => {
     const [cards, setCards] = useState<ConnectionsCard[]>([]);
     const [showCards, setShowCards] = useState(false);
     const [tempWrongGuesses, setTempWrongGuesses] = useState<string[]>([]);
-
-    // Default game state
-    const defaultConnectionsGameState: ConnectionsGameState = {
-        solvedCategories: [],
-        selectedCards: [],
-        wrongGuesses: [],
-        previousGuesses: [],
-        attempts: 4,
-    };
-
-    // Initialize game state if it doesn't exist
-    useEffect(() => {
-        if (!gameState?.game_data) {
-            onUpdateGameState({ game_data: defaultConnectionsGameState });
-        }
-    }, [gameState]);
+    const [selectedCards, setSelectedCards] = useState<string[]>([]);
 
     // Initialize cards from game data and shuffle
     useEffect(() => {
         if (!game.game_data) return;
+
         const flattenedCards = game.game_data.categories.flatMap((category) =>
             category.items.map((item) => ({
                 content: item,
@@ -47,22 +34,33 @@ const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGame
         );
 
         if (!cards.length) {
-            setCards(flattenedCards.sort(() => Math.random() - 0.5)); // Shuffle cards on load
+            setCards(flattenedCards.sort(() => Math.random() - 0.5));
         }
 
-        // Remove cards of already solved categories
+        // Initialize game state if it doesn't exist
+        if (isNewGame) {
+            console.log("Initializing game state");
+            console.log(gameState);
+            onUpdateGameState({
+                game_data: {
+                    solvedCategories: [],
+                    wrongGuesses: [],
+                    previousGuesses: [],
+                    attempts: 4,
+                },
+            });
+        };
+
         gameState?.game_data?.solvedCategories.forEach((category) => {
             setCards((prev) => prev.filter((card) => card.category !== category.name));
         });
 
         setShowCards(true);
-    }, [game?.game_data, gameState?.game_data]);
+    }, [game?.game_data, gameState]);
 
     // Handle card selection
     const handleCardClick = (content: string) => {
         if (!gameState?.game_data || gameState.game_data.attempts <= 0) return;
-
-        const { selectedCards } = gameState.game_data;
 
         // Prevent adding more than 4 cards unless deselecting
         if (selectedCards.length >= 4 && !selectedCards.includes(content)) return;
@@ -71,16 +69,15 @@ const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGame
             ? selectedCards.filter((card) => card !== content)
             : [...selectedCards, content];
 
-        onUpdateGameState({
-            game_data: { ...gameState.game_data, selectedCards: updatedSelectedCards },
-        });
+        setSelectedCards(updatedSelectedCards);
     };
 
     // Validate the selected cards and check the guess
     const checkSelection = () => {
         if (!gameState?.game_data) return;
+        if (gameState.game_completed) return;
 
-        const { selectedCards, solvedCategories, attempts, previousGuesses } = gameState.game_data;
+        const { solvedCategories, attempts, previousGuesses, wrongGuesses } = gameState.game_data;
 
         if (selectedCards.length !== 4 || attempts <= 0) return;
 
@@ -98,46 +95,45 @@ const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGame
             const solvedCategory = game.game_data.categories.find((cat) => cat.name === selectedCategory);
             if (solvedCategory) {
                 const newSolvedCategories = [...solvedCategories, solvedCategory];
-                const isGameWon = newSolvedCategories.length === game.game_data.categories.length; // Check if all categories are solved
+                const isGameWon = newSolvedCategories.length === game.game_data.categories.length;
 
                 onUpdateGameState({
-                    game_completed: isGameWon, // Game is over if all categories are solved
-                    game_won: isGameWon, // Player wins if they solved all categories
+                    game_completed: isGameWon,
+                    game_won: isGameWon,
                     game_data: {
                         ...gameState.game_data,
                         solvedCategories: newSolvedCategories,
-                        selectedCards: [],
                         previousGuesses: [...previousGuesses, currentGuessString],
                     },
                 });
+
+                setCards((prev) => prev.filter((card) => card.category !== selectedCategory));
+                clearSelection();
             }
-            setCards((prev) => prev.filter((card) => !selectedCards.includes(card.content)));
         } else {
             const remainingAttempts = attempts - 1;
-            const isGameOver = remainingAttempts === 0; // Game over if no attempts are left
 
             onUpdateGameState({
-                game_completed: isGameOver, // Mark game as over
-                game_won: false, // Player loses if no attempts are left
+                game_completed: remainingAttempts === 0,
+                game_won: false,
+                ended_at: remainingAttempts === 0 ? new Date() : null,
                 game_data: {
                     ...gameState.game_data,
                     attempts: remainingAttempts,
-                    selectedCards: [],
-                    wrongGuesses: selectedCards,
+                    wrongGuesses: [...wrongGuesses, currentGuessString],
                     previousGuesses: [...previousGuesses, currentGuessString],
                 },
             });
 
             setTempWrongGuesses(selectedCards);
-            setTimeout(() => setTempWrongGuesses([]), 1000);
+            setTimeout(() => clearSelection(), 1000);
         }
     };
 
-
     // Clear selected cards
     const clearSelection = () => {
-        if (!gameState?.game_data) return;
-        onUpdateGameState({ game_data: { ...gameState.game_data, selectedCards: [] } });
+        setSelectedCards([]);
+        setTempWrongGuesses([]);
     };
 
     // Shuffle the cards
@@ -150,7 +146,6 @@ const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGame
 
     return (
         <>
-
             {gameState?.game_completed ? (
                 <div className="text-center mt-6">
                     {gameState?.game_won ? (
@@ -176,7 +171,7 @@ const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGame
                                 <AnimatedCard
                                     key={card.content}
                                     card={card}
-                                    isSelected={gameState?.game_data?.selectedCards.includes(card.content)}
+                                    isSelected={selectedCards.includes(card.content)}
                                     onClick={() => handleCardClick(card.content)}
                                     isWrong={tempWrongGuesses.includes(card.content)}
                                 />
@@ -186,7 +181,7 @@ const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGame
                         onShuffle={shuffleCards}
                         onClear={clearSelection}
                         onSubmit={checkSelection}
-                        isSubmitDisabled={gameState.game_data.selectedCards.length !== 4}
+                        isSubmitDisabled={selectedCards.length !== 4}
                         gameOver={gameState.game_data.attempts === 0}
                     />
                 </div>

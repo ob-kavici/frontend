@@ -14,15 +14,14 @@ const GameRoute: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!gameTypeId) return;
+        if (!gameTypeId || gameState) return;
 
         const fetchGame = async () => {
             try {
                 const fetchedGame = await GamesService.getDailyGame(gameTypeId);
                 setGame(fetchedGame);
 
-                const fetchedGameState = await GamesService.getOrInitializeGameState(fetchedGame);
-                console.log(fetchedGameState);
+                const fetchedGameState = await GamesService.getOrInitializeGameState(fetchedGame.id);
                 setGameState(fetchedGameState);
             } catch (error) {
                 setGame(null);
@@ -39,7 +38,6 @@ const GameRoute: React.FC = () => {
     const updateGameState = async (updatedState: Partial<GameState>) => {
         if (!gameState) return;
 
-        // Update the local state
         setGameState((prev) => {
             if (!prev) return prev;
             return {
@@ -48,7 +46,6 @@ const GameRoute: React.FC = () => {
             };
         });
 
-        // Persist the updated state
         await GamesService.updateGameState({
             ...gameState,
             ...updatedState,
@@ -67,6 +64,7 @@ const GameRoute: React.FC = () => {
                     game={game}
                     gameState={gameState}
                     onUpdateGameState={updateGameState}
+                    isNewGame={!gameState.game_data}
                 />
             )}
         </GameLayout>

@@ -31,7 +31,7 @@ export interface GameState {
     game_id: number;
     user_id: string;
     started_at: Date;
-    ended_at?: Date;
+    ended_at: Date | null;
     game_completed: boolean;
     game_won: boolean;
     game_data?: ConnectionsGameState;

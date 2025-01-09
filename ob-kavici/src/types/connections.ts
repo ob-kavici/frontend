@@ -10,7 +10,6 @@ export interface ConnectionsGameData {
 
 export interface ConnectionsGameState {
     solvedCategories: ConnectionsCategory[];
-    selectedCards: string[];
     wrongGuesses: string[];
     previousGuesses: string[];
     attempts: number;
