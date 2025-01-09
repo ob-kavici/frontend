@@ -10,45 +10,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Check out the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Log current branch and files for debugging
       - name: Print current branch and files
         run: |
           git branch
           git log -1
           ls -al
 
+      # Step 3: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # Step 4: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Step 5: Build and push Docker image with versioned tags
       - name: Build and push Docker image
         run: |
-          docker build --build-arg VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} -t kofolmarko/frontend:latest .
+          TAG=$(git rev-parse --short HEAD)  # Use the short commit hash as the tag
+          docker build --build-arg VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} -t kofolmarko/frontend:$TAG -t kofolmarko/frontend:latest .
+          docker push kofolmarko/frontend:$TAG
           docker push kofolmarko/frontend:latest
 
+      # Step 6: Set up Kubeconfig for Kubernetes access
       - name: Set up Kubeconfig
         run: |
           mkdir ${HOME}/.kube
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
 
+      # Step 7: Use Kubernetes context
       - name: Use context
         run: kubectl config use-context obKaviciAKS
 
+      # Step 8: Apply Kubernetes Secrets
       - name: Apply Kubernetes Secret
         run: |
           kubectl create secret generic frontend-secrets \
           --from-literal=VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
           --from-literal=VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
+          --from-literal=VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} \
           --dry-run=client -o yaml | kubectl apply -f -
 
+      # Step 9: Deploy to Kubernetes with dynamic image tag
       - name: Deploy Frontend to AKS
         run: |
-          kubectl apply -f k8s/
+          TAG=$(git rev-parse --short HEAD)  # Use the same tag for deployment
+          kubectl set image deployment/frontend frontend=kofolmarko/frontend:$TAG --record
           kubectl rollout status deployment/frontend
