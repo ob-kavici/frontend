@@ -12,6 +12,7 @@ ENV VITE_SUPABASE_KEY=$VITE_SUPABASE_KEY
 ENV VITE_GAMES_SERVICE_URL=$VITE_GAMES_SERVICE_URL
 RUN pnpm run build
 FROM nginx:stable-alpine
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
