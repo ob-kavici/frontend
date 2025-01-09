@@ -1,4 +1,6 @@
-import { supabase } from './supabase-service';
+import { toast } from '@/lib/hooks/use-toast';
+import { supabase } from '@/services/supabase-service';
+import { useNavigate } from 'react-router-dom';
 
 export const login = async (identifier: string, password: string) => {
   let email = identifier;
@@ -42,3 +44,25 @@ export const logout = async () => {
   const { error } = await supabase.auth.signOut();
   return error;
 };
+
+export const getJwt = async (): Promise<string | null> => {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    toast({ title: 'Napaka', description: 'Seja je potekla', variant: 'destructive' });
+    const navigate = useNavigate();
+    navigate('/login');
+    return null;
+  }
+  return data?.session?.access_token || null;
+};
+
+export const getRefreshToken = async (): Promise<string | null> => {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    toast({ title: 'Napaka', description: 'Seja je potekla', variant: 'destructive' });
+    const navigate = useNavigate();
+    navigate('/login');
+    return null;
+  }
+  return data?.session?.refresh_token || null;
+}

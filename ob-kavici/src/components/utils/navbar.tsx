@@ -1,51 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-} from "@/components/ui/avatar"
+} from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ModeToggle } from './mode-toggle';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '@/services/auth-service';
-import { supabase } from '@/services/supabase-service';
 import { Button } from '../ui/button';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/lib/hooks/use-toast';
+import { useUser } from '@/lib/contexts/user-context';
 
-const Navbar: React.FC = () => {
-    const [user, setUser] = useState<any>(null);
+interface NavbarProps {
+    title: string;
+    linkTo: string;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ title, linkTo }) => {
+    const { user, username, setUser, setUsername } = useUser();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const { data, error } = await supabase.auth.getUser();
-            if (error?.status === 500) {
-                toast({ title: 'Server Error', description: 'Authentication currently unavailable', variant: 'destructive' });
-            } else {
-                setUser(data?.user);
-            }
-        };
-
-        fetchUser();
-
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user || null);
-        });
-
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, []);
-
     const handleLogout = async () => {
-        await logout();
-        setUser(null);
-        navigate('/auth');
+        const error = await logout();
+        if (!error) {
+            setUser(null);
+            setUsername(null);
+            navigate('/');
+        } else {
+            toast({ title: 'Napaka', description: 'Odjava ni uspela', variant: 'destructive' });
+        }
     };
 
     return (
         <div className="flex items-center justify-between p-5 bg-background text-foreground">
-            <Link to="/" className="text-4xl font-cursive hover:text-amber-400">ob-kavici</Link>
+            <Link to={linkTo} className="text-4xl font-cursive hover:text-amber-400">{title}</Link>
             <div className="flex items-center space-x-4">
                 <ModeToggle />
                 {user ? (
@@ -53,25 +42,23 @@ const Navbar: React.FC = () => {
                         <DropdownMenuTrigger>
                             <Avatar>
                                 <AvatarImage src="https://via.placeholder.com/150" alt="User Avatar" />
-                                <AvatarFallback>U</AvatarFallback>
+                                <AvatarFallback>{username?.charAt(0) || 'U'}</AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                            <DropdownMenuLabel>{username || 'Nalaganje...'}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <Link to="/profile">Profile</Link>
+                                <Link to="/profile">Profil</Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleLogout} className="text-destructive">Log Out</DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleLogout} className="text-destructive">Odjava</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
                     <Link to="/auth">
-                        <Button variant="outline">Log In</Button>
+                        <Button variant="outline">Prijava</Button>
                     </Link>
-                )
-                }
-
+                )}
             </div>
         </div>
     );
