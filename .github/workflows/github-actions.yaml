@@ -36,7 +36,7 @@ jobs:
       - name: Build and push Docker image with versioned tags
         run: |
           TAG=$(git rev-parse --short HEAD)  # Use the short commit hash as the tag
-          docker build \
+          docker build --no-cache \
             --build-arg VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --build-arg VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
             --build-arg VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} \
