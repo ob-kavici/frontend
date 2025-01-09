@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 5: Build and push Docker image with versioned tags
+      # Step 5: Build and push Docker image with versioned tags, new game-service URL
       - name: Build and push Docker image with versioned tags
         run: |
           TAG=$(git rev-parse --short HEAD)  # Use the short commit hash as the tag
