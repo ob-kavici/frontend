@@ -95,6 +95,7 @@ class GamesService {
             game_id: gameId,
             user_id: (await this.getUserId()) || 'anonymous',
             started_at: new Date(),
+            ended_at: null,
             game_completed: false,
             game_won: false,
         };

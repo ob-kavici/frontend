@@ -39,8 +39,12 @@ export const createAppRouter = (queryClient: QueryClient) => {
             lazy: () => import('./routes/auth/forgot-password').then(convert(queryClient)),
         },
         {
-            path: paths.profile.path,
+            path: paths.profile.root.path,
             lazy: () => import('./routes/profile/profile').then(convert(queryClient)),
+        },
+        {
+            path: paths.profile.editor.path,
+            lazy: () => import('./routes/profile/editor-profile').then(convert(queryClient)),
         },
         {
             path: paths.games.root.path,
