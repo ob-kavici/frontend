@@ -36,7 +36,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           TAG=$(git rev-parse --short HEAD)  # Use the short commit hash as the tag
-          docker build --build-arg VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} -t kofolmarko/ob-kavici-frontend:$TAG -t kofolmarko/ob-kavici-frontend:latest .
+          docker build -t kofolmarko/ob-kavici-frontend:$TAG -t kofolmarko/ob-kavici-frontend:latest .
           docker push kofolmarko/ob-kavici-frontend:$TAG
           docker push kofolmarko/ob-kavici-frontend:latest
 

@@ -17,19 +17,6 @@ spec:
           image: kofolmarko/ob-kavici-frontend:<IMAGE_TAG>  # Placeholder for dynamic tag
           ports:
             - containerPort: 80
-          env:
-            - name: VITE_SUPABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: frontend-secrets
-                  key: VITE_SUPABASE_URL
-            - name: VITE_SUPABASE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: frontend-secrets
-                  key: VITE_SUPABASE_KEY
-            - name: VITE_GAMES_SERVICE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: frontend-secrets
-                  key: VITE_GAMES_SERVICE_URL
+          envFrom:
+            - secretRef:
+                name: frontend-secrets
