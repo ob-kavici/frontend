@@ -20,6 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd ob-kavici
           npm install -g pnpm
           pnpm install
 
