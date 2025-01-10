@@ -61,13 +61,11 @@ class GamesService {
     }
 
     public async getDailyGame(gameType: string): Promise<Game> {
-        console.log("Get daily game", gameType);
         const response = await this.axiosInstance.get(`/${gameType}/daily`,);
         return response.data;
     }
 
     public async getGameState(gameId: number): Promise<GameState | null> {
-        console.log("Get game state", gameId);
         const userId = await this.getUserId();
 
         if (userId) {
@@ -83,7 +81,6 @@ class GamesService {
     }
 
     public async getOrInitializeGameState(gameId: number): Promise<GameState> {
-        console.log("Get or initialize game state", gameId);
         // TODO check
         const existingState = await this.getGameState(gameId);
 
@@ -111,7 +108,6 @@ class GamesService {
     }
 
     public async updateGameState(gameState: GameState): Promise<void> {
-        console.log("Update game state", gameState);
         if (gameState.user_id === 'anonymous') {
             this.saveToLocalStorage(gameState.game_id, gameState);
             return;

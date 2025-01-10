@@ -39,8 +39,6 @@ const Connections: React.FC<ConnectionsProps> = ({ game, gameState, onUpdateGame
 
         // Initialize game state if it doesn't exist
         if (isNewGame) {
-            console.log("Initializing game state");
-            console.log(gameState);
             onUpdateGameState({
                 game_data: {
                     solvedCategories: [],
