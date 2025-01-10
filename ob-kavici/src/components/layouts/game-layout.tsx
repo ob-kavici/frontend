@@ -7,9 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { Game } from "@/types/games";
 
 interface GameLayoutProps {
-    game: any;
+    game: Game | null;
     gameTypeTitle: string;
     children: React.ReactNode;
 }
@@ -17,14 +18,13 @@ interface GameLayoutProps {
 export const GameLayout: React.FC<GameLayoutProps> = ({ game, gameTypeTitle, children }) => {
     const [editorUsername, setEditorUsername] = useState<string>("");
     const [stars, setStars] = useState(game?.stars || 0);
-    const [solves, setSolves] = useState(game?.solves || 0);
+    // const [solves, setSolves] = useState(game?.solves || 0);
     const [upvoted, setUpvoted] = useState(false);
 
     useEffect(() => {
-        if (!game?.editor_id) return;
-
         const fetchEditorUsername = async () => {
             try {
+                if (!game?.editor_id) return;
                 const profile = await ProfileService.getProfile(game.editor_id);
                 setEditorUsername(profile?.username || "");
             } catch {

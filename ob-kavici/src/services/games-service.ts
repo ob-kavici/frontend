@@ -47,11 +47,11 @@ class GamesService {
         return rawGameState;
     }
 
-    private clearLocalStorage(gameId: number) {
-        const localData = JSON.parse(localStorage.getItem('gameStates') || '{}');
-        delete localData[gameId];
-        localStorage.setItem('gameStates', JSON.stringify(localData));
-    }
+    // private clearLocalStorage(gameId: number) {
+    //     const localData = JSON.parse(localStorage.getItem('gameStates') || '{}');
+    //     delete localData[gameId];
+    //     localStorage.setItem('gameStates', JSON.stringify(localData));
+    // }
 
     public async getGameTypes(gameTypeId?: string): Promise<GameType[] | GameType> {
         const response = await this.axiosInstance.get('/game-types', {
