@@ -29,66 +29,54 @@ jobs:
 
   build-and-deploy:
     runs-on: ubuntu-latest
-    # needs: test
+    needs: test  # Ensure tests pass before deploying
 
     steps:
-      # Step 1: Check out the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Log current branch and files for debugging
-      - name: Print current branch and files
-        run: |
-          git branch
-          git log -1
-          ls -al
-
-      # Step 3: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 4: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 5: Build and push Docker image with versioned tags, new game-service URL
-      - name: Build and push Docker image with versioned tags
+      - name: Build and push Docker image
         run: |
-          TAG=$(git rev-parse --short HEAD)  # Use the short commit hash as the tag
+          TAG=$(git rev-parse --short HEAD)
           docker build --no-cache \
             --build-arg VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --build-arg VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
-            --build-arg VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} \
+            --build-arg VITE_GAMES_SERVICE_URL=http://api.ob-kavici.si \
             -t kofolmarko/ob-kavici-frontend:$TAG \
             -t kofolmarko/ob-kavici-frontend:latest .
           docker push kofolmarko/ob-kavici-frontend:$TAG
           docker push kofolmarko/ob-kavici-frontend:latest
 
-      # Step 6: Set up Kubeconfig for Kubernetes access
       - name: Set up Kubeconfig
         run: |
-          mkdir ${HOME}/.kube
+          mkdir -p ${HOME}/.kube
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
 
-      # Step 7: Use Kubernetes context
-      - name: Use context
-        run: kubectl config use-context obKaviciAKS
-
-      # Step 8: Apply Kubernetes Secrets
-      - name: Apply Kubernetes Secret
+      - name: Install Helm
         run: |
-          kubectl create secret generic frontend-secrets \
-          --from-literal=VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-          --from-literal=VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
-          --from-literal=VITE_GAMES_SERVICE_URL=${{ secrets.GAMES_SERVICE_URL }} \
-          --dry-run=client -o yaml | kubectl apply -f -
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-      # Step 9: Deploy to Kubernetes with dynamic image tag
-      - name: Deploy Frontend to AKS
+      - name: Deploy Frontend to AKS with Helm
         run: |
-          TAG=$(git rev-parse --short HEAD)  # Use the same tag for deployment
-          kubectl set image deployment/frontend frontend=kofolmarko/ob-kavici-frontend:$TAG --record
+          TAG=$(git rev-parse --short HEAD)
+          helm upgrade --install frontend ./charts \
+            --set image.repository=kofolmarko/ob-kavici-frontend \
+            --set image.tag=$TAG \
+            --set ingress.enabled=true \
+            --set ingress.host=www.ob-kavici.si \
+            --set VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            --set VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
+            --set VITE_GAMES_SERVICE_URL=http://api.ob-kavici.si
+
+      - name: Verify Deployment
+        run: |
           kubectl rollout status deployment/frontend
