@@ -5,9 +5,24 @@ metadata:
   name: {{ .Chart.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location / {
+        return 301 $scheme://www.ob-kavici.si$request_uri;
+      }
 spec:
+  ingressClassName: nginx
   rules:
-  - host: {{ .Values.ingress.host }}
+  - host: www.ob-kavici.si
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Chart.Name }}
+            port:
+              number: {{ .Values.service.port }}
+  - host: ob-kavici.si
     http:
       paths:
       - path: /
