@@ -67,22 +67,22 @@ jobs:
       - name: Deploy Frontend to AKS with Helm
         run: |
           TAG=$(git rev-parse --short HEAD)
+          # Determine environment
           if [[ $GITHUB_REF == "refs/heads/main" ]]; then
-            ENV="prod"
+            VALUES_FILE="./charts/values.prod.yaml"
           elif [[ $GITHUB_REF == "refs/heads/develop" ]]; then
-            ENV="dev"
+            VALUES_FILE="./charts/values.dev.yaml"
           else
             echo "Unsupported branch. Exiting."
             exit 1
           fi
 
           helm upgrade --install frontend ./charts \
-            --values values.${ENV}.yaml \
+            --values $VALUES_FILE \
             --set image.tag=$TAG \
             --set VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --set VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
             --set VITE_GAMES_SERVICE_URL=http://api.ob-kavici.si
-
 
       - name: Verify Deployment
         run: |
