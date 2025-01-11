@@ -20,3 +20,10 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.targetPort }}
+        env:
+        - name: VITE_SUPABASE_URL
+          value: "{{ .Values.VITE_SUPABASE_URL }}"
+        - name: VITE_SUPABASE_KEY
+          value: "{{ .Values.VITE_SUPABASE_KEY }}"
+        - name: VITE_GAMES_SERVICE_URL
+          value: "{{ .Values.VITE_GAMES_SERVICE_URL }}"

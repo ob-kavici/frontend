@@ -1,0 +1,15 @@
+replicaCount: 1
+
+image:
+  repository: kofolmarko/ob-kavici-frontend
+  tag: latest
+  pullPolicy: Always  # Ensures the latest image is always pulled in development.
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+ingress:
+  enabled: true
+  host: dev.ob-kavici.si  # Use a different host for the dev environment.
