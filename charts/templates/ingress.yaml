@@ -5,10 +5,6 @@ metadata:
   name: {{ .Chart.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location / {
-        return 301 $scheme://www.ob-kavici.si$request_uri;
-      }
 spec:
   ingressClassName: nginx
   rules:
