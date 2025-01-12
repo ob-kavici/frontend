@@ -49,7 +49,8 @@ jobs:
           docker build --no-cache \
             --build-arg VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --build-arg VITE_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
-            --build-arg VITE_GAMES_SERVICE_URL=http://api.ob-kavici.si \
+            --build-arg VITE_GAMES_SERVICE_URL=http://games.ob-kavici.si \
+            --build-arg VITE_STATS_SERVICE_URL=http://stats.ob-kavici.si \
             -t kofolmarko/ob-kavici-frontend:$TAG \
             -t kofolmarko/ob-kavici-frontend:latest .
           docker push kofolmarko/ob-kavici-frontend:$TAG
